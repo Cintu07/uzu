@@ -228,6 +228,11 @@ PUBLIC KERNEL(UnifiedSampling) (
     if (has_min_p && candidate_logit_pre_filter.value < pre_filter_logit_max + log_min_p) {
       filters_passed = false;
     }
+    // Nothing ranks above the most likely token and it always survives, otherwise the chain would move on to LOWEST
+    // and the next iteration would load logits[UINT32_MAX]
+    if (next_candidate_logit_post_gumbel.index == Logit::LOWEST.index) {
+      filters_passed = true;
+    }
 
     if (filters_passed || iteration == MAX_ITERS - 1) {
       *output = candidate_logit_post_gumbel.index;

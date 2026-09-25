@@ -69,9 +69,11 @@ pub fn unified_sampling<T: ArrayElement + Float>(
             logits.fill(f32::NEG_INFINITY);
             let mut top_p_mass = 0.0;
             for (top_k_num, (index, logit)) in sorted_logits.into_iter().enumerate() {
-                if (has_top_k && top_k_num as u32 >= top_k.unwrap())
-                    || (has_top_p && top_p_mass >= top_p.unwrap())
-                    || (has_min_p && logit < logits_max + min_p.unwrap().ln())
+                // The most likely token always survives, so degenerate filter values can't empty the candidate set
+                if top_k_num > 0
+                    && ((has_top_k && top_k_num as u32 >= top_k.unwrap())
+                        || (has_top_p && top_p_mass >= top_p.unwrap())
+                        || (has_min_p && logit < logits_max + min_p.unwrap().ln()))
                 {
                     break;
                 }

@@ -236,6 +236,13 @@ fn stochastic(
 }
 
 #[uzu_test]
+fn test_filters_keep_most_likely_token() {
+    let methods = [stochastic(None, None, Some(0.0), None), stochastic(Some(0.7), Some(40), None, Some(1.5))];
+    assert_matches_greedy::<f32>(&methods);
+    assert_matches_greedy::<bf16>(&methods);
+}
+
+#[uzu_test]
 fn test_zero_temperature_is_greedy() {
     let methods = [stochastic(Some(0.0), None, None, None), stochastic(Some(0.0), Some(40), Some(0.9), Some(0.05))];
     assert_matches_greedy::<f32>(&methods);
